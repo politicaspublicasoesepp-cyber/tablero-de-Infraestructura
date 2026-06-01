@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Dashboard - Infraestructura Universitaria (MPPEU)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f0f4f8;
+            color: #1e2a3e;
+            padding: 24px 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Encabezado */
+        .header {
+            background: linear-gradient(135deg, #0b3b5f, #0f4c5f);
+            color: white;
+            padding: 28px 32px;
+            border-radius: 28px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.85;
+            margin-top: 8px;
+        }
+
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border-radius: 24px;
+            padding: 12px 24px;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        /* filtros */
+        .filters-bar {
+            background: white;
+            border-radius: 40px;
+            padding: 12px 24px;
+            margin-bottom: 32px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #1e4a6e;
+        }
+
+        select, input {
+            padding: 10px 18px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.9rem;
+            background: white;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        select:focus, input:focus {
+            border-color: #0f5b7a;
+            box-shadow: 0 0 0 2px rgba(15,91,122,0.2);
+        }
+
+        .clear-btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: #cbd5e1;
+        }
+
+        /* grid de tarjetas */
+        .universities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 28px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            padding: 20px 24px 12px 24px;
+            background: #ffffff;
+            border-bottom: 2px solid #eef2f6;
+        }
+
+        .uni-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0c4e6e;
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+
+        .uni-state {
+            display: inline-block;
+            background: #e2f0fa;
+            color: #0b5e7e;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .card-body {
+            padding: 16px 24px 24px 24px;
+            flex: 1;
+        }
+
+        .needs-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #5b6e8c;
+            margin-bottom: 12px;
+        }
+
+        .needs-list {
+            list-style: none;
+            margin: 0;
+        }
+
+        .needs-list li {
+            font-size: 0.9rem;
+            padding-left: 20px;
+            position: relative;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            color: #1e2f3f;
+        }
+
+        .needs-list li::before {
+            content: "▹";
+            position: absolute;
+            left: 0;
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        .badge-critical {
+            background: #fee2e2;
+            color: #b91c1c;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+
+        .footer-card {
+            background: #f9fafc;
+            padding: 12px 24px;
+            border-top: 1px solid #edf2f7;
+            font-size: 0.7rem;
+            color: #4a627a;
+            text-align: right;
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            color: #5b6e8c;
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 16px; }
+            .header h1 { font-size: 1.4rem; }
+            .universities-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <div class="header">
+        <h1>📋 INFORME CONSOLIDADO DE NECESIDADES</h1>
+        <p>Ministerio del Poder Popular para la Educación Universitaria · Solicitudes de infraestructura 2025-2026</p>
+        <div class="stats-row">
+            <div class="stat-card"><div class="stat-number" id="totalUnis">39</div><div>Universidades / núcleos</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalEstados">0</div><div>Estados involucrados</div></div>
+            <div class="stat-card"><div class="stat-number" id="filteredCount">39</div><div>Mostradas</div></div>
+        </div>
+    </div>
+
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label>🏛️ Estado:</label>
+            <select id="estadoFilter">
+                <option value="todos">Todos</option>
+            </select>
+            <label>🔍 Buscar:</label>
+            <input type="text" id="searchInput" placeholder="Universidad o palabra clave..." autocomplete="off">
+        </div>
+        <button class="clear-btn" id="clearFilters">Limpiar filtros</button>
+    </div>
+
+    <div id="universitiesContainer" class="universities-grid">
+        <!-- Las tarjetas se inyectarán con JS -->
+    </div>
+</div>
+
+<script>
+    // DATOS COMPLETOS: 39 universidades/institutos (resumen fiel al documento)
+    const universitiesData = [
+        { id:1, nombre:"Universidad Politécnica Territorial José Antonio Anzoátegui (UPTJAA)", estado:"Anzoátegui", necesidades:["Sede Barcelona: solo 12 aulas para +4.000 estudiantes, alquiler de colegio privado con riesgo de continuidad.","Sede El Tigre: recuperación de talleres de tornos, mecánica y química; instalación de 2 bancos de transformadores 70 kVA.","Todas las sedes: 20 aires acondicionados y 600 mesas-sillas."] },
+        { id:2, nombre:"Universidad Politécnica Territorial de Yaracuy \"Arístides Bastidas\" (UPTYAB)", estado:"Yaracuy", necesidades:["Rehabilitación Etapa I: 5.600 m² (14 aulas, 5 laboratorios, biblioteca, auditorio, servicios médicos, 4 salas de reuniones, 4 baños).","Beneficiarios: 3.559 estudiantes, 267 docentes, 196 obreros, 100 administrativos."] },
+        { id:3, nombre:"Universidad Politécnica Territorial de los Llanos \"Juana Ramírez\"", estado:"Guárico", necesidades:["Sustitución de techos de acerolit en 4.420 m² (82 espacios), impermeabilización de platabanda (deterioro >90% desde 1973).","Adquisición de 3 autobuses 60 puestos y 3 vehículos rústicos para prácticas agropecuarias."] },
+        { id:4, nombre:"Universidad Politécnica Territorial de Aragua (UPT Aragua)", estado:"Aragua", necesidades:["Sede La Victoria: impermeabilización (edificio A 505m², pasillos 198m², comedor 1.084m²) + 10 baterías de baños.","Sede Maracay: impermeabilización 1.300 m² + rehabilitación 2 baterías de baños."] },
+        { id:5, nombre:"Universidad Politécnica Territorial (UPTTMBI) – Trujillo", estado:"Trujillo", necesidades:["Sustitución techos machihembrado/acerolit; impermeabilización (5.811m² Trujillo, 4.096m² Dividive, 1.000m² San Luis).","Rehabilitación 34 baterías sanitarias, reparación eléctrica (1.600 luminarias LED), pintura, patología estructura edificio C La Beatriz, comedor sin redes."] },
+        { id:6, nombre:"Universidad Politécnica Territorial de los Valles del Tuy (UPTVT)", estado:"Miranda", necesidades:["Sede Rectoral: rehabilitación techo 550m² madera/tejas. Sede Paz Castillo: reforzamiento, sistema eléctrico, cerramientos, pared perimetral, redes hidrosanitarias. Sede Urdaneta: 17 ventanas, 18 puertas."] },
+        { id:7, nombre:"Universidad Politécnica Territorial de Valencia (UPT Valencia)", estado:"Carabobo", necesidades:["Construcción nueva cubierta metálica (3.163,83 m²) por riesgo colapso losa años 80.","Rehabilitación baterías baños, sustitución ramales asbesto cemento."] },
+        { id:8, nombre:"Universidad Deportiva del Sur (UDS)", estado:"Cojedes", necesidades:["Impermeabilización 50 unidades habitacionales; rehabilitación 11 aulas (pintura, vidrios, cielo raso, electricidad, 22 AA split, 11 pizarras).","Acondicionamiento gimnasio, rehabilitación cocina comedor, ampliación salud."] },
+        { id:9, nombre:"CECA Aquiles Nazoa UNEARTE – Caracas", estado:"Distrito Capital", necesidades:["Teatro Anna Julia Rojas: sistemas contra incendios, butacas, piso escenario, iluminación, AA, agua potable, ascensores.","Modesta Bor: trabajos inconclusos. Armando Reverón: techos galpones deteriorados, paredes, pisos, baños, sistema hidroneumático."] },
+        { id:10, nombre:"Universidad Nacional Experimental del Yaracuy (UNEY)", estado:"Yaracuy", necesidades:["Sede CEHOTUR: 2 bombas sumergibles 3hp aguas servidas. Módulo STAC: impermeabilización 920m².","Laboratorios ingeniería: 20 equipos de computación."] },
+        { id:11, nombre:"UPT del Estado Mérida \"Kléber Ramírez\"", estado:"Mérida", necesidades:["Filtraciones severas, cielo raso colapsado, baterías de baños inoperativas.","2 canchas sin techo, edificio I inconcluso, estacionamiento 3 a medias. Materiales: 39 AA, 150 luminarias LED, 48 fluxómetros, cisterna 5000L."] },
+        { id:12, nombre:"Universidad Politécnica Territorial Andrés Eloy Blanco (UPTAEB)", estado:"Lara", necesidades:["Emergencia eléctrica edificio La Hilandería. Culminación Comedor Universitario. Reparación aulas con filtraciones, atención Dirección de Cultura."] },
+        { id:13, nombre:"UPT del Norte del Táchira \"Manuela Sáenz\"", estado:"Táchira", necesidades:["Plan Universidad Bella: pintura, electricidad (200 luminarias LED), impermeabilización (70 rollos manto), techos zinc. Capítulo II y III incluyen tanque agua 5.000L, alambre de púas."] },
+        { id:14, nombre:"Universidad Venezolana de los Hidrocarburos", estado:"Miranda", necesidades:["Construcción de laboratorios de ciencias e hidrocarburos (pendiente remodelación PDVSA)."] },
+        { id:15, nombre:"UNERMB Sede Los Laureles", estado:"Zulia", necesidades:["Impermeabilización total cubiertas (biblioteca con filtraciones), reparación canales lluvia, pantalla perimetral corroída, climatización (biblioteca sin AA)."] },
+        { id:16, nombre:"UPT de Barlovento \"Argelia Laya\"", estado:"Miranda", necesidades:["Impermeabilización edificio administrativo en ejecución por alcaldía (material donado junio 2025). Saneamiento eléctrico aulas, colocación de puertas para evitar hurto de bombillas."] },
+        { id:17, nombre:"Universidad Nacional del Turismo (UNATUR)", estado:"Varios", necesidades:["NHE Gran Caracas: adecuación; NHE Anzoátegui: pintura; NHE Los Andes (Mérida): impermeabilización terraza y aula Somellier."] },
+        { id:18, nombre:"UPT del Estado Bolívar (UPT Bolívar)", estado:"Bolívar", necesidades:["Ajuste presupuesto alquileres. Deuda Sede Germania $6.902 (oct2025-abr2026), Sede Dalla Costa $7.870. Arrendador exige pago $4.125 urgentes y amenaza con desalojo."] },
+        { id:19, nombre:"UPT Norte de Monagas \"Ludovico Silva\"", estado:"Monagas", necesidades:["Sustitución 2.500 luminarias fluorescentes por LED, bancos de pruebas, impermeabilización 2.000 m², redes aguas servidas, AA, bacheo 2.000 m²."] },
+        { id:20, nombre:"UNELLEZ – Barinas", estado:"Barinas", necesidades:["Sustitución techos asbesto 11.276m², pozo profundo, 9 baterías de baños (54 pocetas), 320 luminarias LED, 40 AA split, pintura 22 pabellones. VPA: impermeabilización 20.420m²."] },
+        { id:21, nombre:"UTD Francisco Tamayo – Delta Amacuro", estado:"Delta Amacuro", necesidades:["Sustitución luminarias fluorescentes (582), instalación 676 tomacorrientes, cableado THW >4km. Reparación techos 3.624m², pintura interior/exterior, adecuación sanitarios, AA, mobiliario."] },
+        { id:22, nombre:"UPT Oeste de Sucre \"Clodosbaldo Russián\"", estado:"Sucre", necesidades:["Derrumbe hirió a profesoras, techos urgentes, baños clausurados. Auditorio cerrado 10 años, 22 laboratorios sin equipos, comedor, flota transporte, actualización tecnológica."] },
+        { id:23, nombre:"Univ. Experimental de Lara \"Martin Luther King\" y Univ. Campesina", estado:"Lara", necesidades:["420 mesas-sillas, 14 pizarras, pintura (100 cuñetes), material eléctrico (transformadores 50kVA, tableros, pararrayos). Iluminación solar y LED, cerraduras, vidrios."] },
+        { id:24, nombre:"UNEG – Bolívar (13 sedes)", estado:"Bolívar", necesidades:["Impermeabilización 19.000 m² con manto (riesgo derrumbe Foro Cultural). Transformador 167,5 KVA averiado desde 2018, 3.543 luminarias LED, 54 AA split, 1.797 mesas-sillas."] },
+        { id:25, nombre:"UNESUR – Zulia", estado:"Zulia", necesidades:["Costo estimado $281.528: rehabilitación eléctrica, transformadores, impermeabilización, pintura 10.301m², 60 AA 36.000 BTU, comedor y transporte."] },
+        { id:26, nombre:"UNERG – Núcleo Zaraza", estado:"Guárico", necesidades:["Medicina Veterinaria: 16 WC, lavamanos, pintura, 150 lámparas LED 72W, 153 reflectores, bomba 7.5HP, manto asfáltico 30 rollos."] },
+        { id:27, nombre:"Universidad de Ciencias de la Salud (UCS) – Aulas nacionales", estado:"Múltiples", necesidades:["Levantamiento nacional: reparación de techos, electricidad, pintura, mobiliario, climatización y baños en núcleos estadales (resumen)."] },
+        { id:28, nombre:"UBV – Varios estados (DC, Miranda, Monagas, Falcón, Mérida, Nueva Esparta, Táchira, Bolívar)", estado:"Múltiples", necesidades:["Sede Los Chaguaramos: 6 ascensores, comedor, 82 salones, planta eléctrica, drenajes, colector aguas negras. Otras sedes: impermeabilización, bombas, pintura, recuperación por incendio en Bolívar."] },
+        { id:29, nombre:"UNESR – Bolívar", estado:"Bolívar", necesidades:["Municipio Angostura del Orinoco: sistema hidroneumático, tabiquería, pupitres, luminarias."] },
+        { id:30, nombre:"Universidad Nacional Abierta (UNA) – Bolívar", estado:"Bolívar", necesidades:["Pintura, impermeabilización."] },
+        { id:31, nombre:"UNES – Bolívar", estado:"Bolívar", necesidades:["Reparación de techos, impermeabilización."] },
+        { id:32, nombre:"Misión Sucre – Bolívar", estado:"Bolívar", necesidades:["Municipio Cedeño: pupitres. Municipio Caroní: pintura, pupitres, luminarias, sistema eléctrico, AA."] },
+        { id:33, nombre:"UNEXPO – Bolívar", estado:"Bolívar", necesidades:["UPS, luminarias, reparación integral gimnasio María Romero (demolición, pisos madera, pintura epóxica)."] },
+        { id:34, nombre:"UDO – Bolívar", estado:"Bolívar", necesidades:["Impermeabilización, material estudio, bomba de agua, luminarias, pintura, reparación sistema eléctrico."] },
+        { id:35, nombre:"UNEFM – Extensión Barinas", estado:"Barinas", necesidades:["Infraestructura hospitalaria saturada (Hospital Razetti con 100 estudiantes). Cobros ilegales denunciados ($500 a $1.000 para ingreso). Se pide investigación penal y auditoría."] },
+        { id:36, nombre:"UPT Falcón \"Alonso Gamero\"", estado:"Falcón", necesidades:["Sede Principal: 5 salas sanitarias, reemplazo cubierta acerolit, AA split, cerca perimetral. Gimnasio Caballito Rosillo, CEPAEB: reparación módulos, techos."] },
+        { id:37, nombre:"UPT Agroindustrial del Táchira (UPTAIET)", estado:"Táchira", necesidades:["Pintura (220 cuñetes interior/exterior), electricidad (180/250 luminarias LED, breakers, tomacorrientes), plomería (griferías, fluxómetros), impermeabilización (130 rollos manto), tanques 5.000L."] },
+        { id:38, nombre:"UPT Barinas \"José Félix Ribas\"", estado:"Barinas", necesidades:["Sede Barinas: impermeabilización, laboratorio nutrición. Núcleo Barinitas: culminación edificio Mecánica y Comedor. Núcleo Socopo: culminación Edificio Administrativo."] },
+        { id:39, nombre:"UNEFA – Múltiples estados", estado:"Múltiples", necesidades:["Zulia: impermeabilización 2500m², ascensores. Monagas: 4 laboratorios, 500 mesas. Bolívar: bomba agua. Aragua, Carabobo, Yaracuy, Miranda, Vargas, Caracas, Nueva Esparta (culminación edificios), Portuguesa, Cojedes, Barinas, Apure, Guárico con requerimientos de techos, AA, luminarias, pintura, baterías sanitarias."] }
+    ];
+
+    // Calcular estados únicos y llenar select
+    const uniqueStates = [...new Set(universitiesData.map(u => u.estado))].sort();
+    const estadoSelect = document.getElementById('estadoFilter');
+    uniqueStates.forEach(state => {
+        const option = document.createElement('option');
+        option.value = state;
+        option.textContent = state;
+        estadoSelect.appendChild(option);
+    });
+    document.getElementById('totalEstados').innerText = uniqueStates.length;
+
+    const container = document.getElementById('universitiesContainer');
+    const searchInput = document.getElementById('searchInput');
+    let currentFilter = { estado: 'todos', search: '' };
+
+    function renderCards() {
+        const filtered = universitiesData.filter(uni => {
+            const matchEstado = currentFilter.estado === 'todos' || uni.estado === currentFilter.estado;
+            const matchSearch = currentFilter.search === '' || uni.nombre.toLowerCase().includes(currentFilter.search.toLowerCase()) || uni.necesidades.some(n => n.toLowerCase().includes(currentFilter.search.toLowerCase()));
+            return matchEstado && matchSearch;
+        });
+
+        document.getElementById('filteredCount').innerText = filtered.length;
+
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="no-results">🔎 No se encontraron universidades con esos filtros.<br>Prueba con otra búsqueda o estado.</div>`;
+            return;
+        }
+
+        container.innerHTML = filtered.map(uni => `
+            <div class="card">
+                <div class="card-header">
+                    <div class="uni-name">${escapeHtml(uni.nombre)}</div>
+                    <span class="uni-state">${escapeHtml(uni.estado)}</span>
+                </div>
+                <div class="card-body">
+                    <div class="needs-title">📌 REQUERIMIENTOS PRIORITARIOS</div>
+                    <ul class="needs-list">
+                        ${uni.necesidades.map(need => `<li>${escapeHtml(need)}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="footer-card">
+                    ${uni.id === 18 ? '⚠️ Deuda crítica de alquiler en USD' : (uni.id === 35 ? '🚨 Denuncias de corrupción' : 'Solicitud activa MPPEU')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    function updateFilters() {
+        currentFilter.estado = estadoSelect.value;
+        currentFilter.search = searchInput.value;
+        renderCards();
+    }
+
+    estadoSelect.addEventListener('change', updateFilters);
+    searchInput.addEventListener('input', updateFilters);
+    document.getElementById('clearFilters').addEventListener('click', () => {
+        estadoSelect.value = 'todos';
+        searchInput.value = '';
+        updateFilters();
+    });
+
+    renderCards();
+</script>
+</body>
+</html>
